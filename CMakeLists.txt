@@ -63,7 +63,6 @@ endif()
 make_directory(${BUILD_OUTPUT_PATH})
 
 # Link vendor files
-
 add_subdirectory(vendor/SDL)
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2)
 

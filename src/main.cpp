@@ -1,33 +1,25 @@
-#include <SDL.h>
+#include "engine.h"
+
+Engine::Engine* engine;
+
+void ProcessInput(SDL_Event& event) {
+    while (SDL_PollEvent(&event) > 0) {
+        if (event.type == SDL_QUIT) engine->QueueQuit();
+    }
+}
+
+void Update(Engine::TimeState& timestate) {}
+
+void Render() {
+    SDL_SetRenderDrawColor(engine->GetRenderer(), 255, 89, 77, 255);
+    SDL_RenderClear(engine->GetRenderer());
+    SDL_RenderPresent(engine->GetRenderer());
+}
 
 int main(int argc, char** args) {
-    SDL_Init(SDL_INIT_EVERYTHING);
+    engine = new Engine::Engine("Pong", ProcessInput, Update, Render);
 
-    SDL_Window* window =
-        SDL_CreateWindow("Pong", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                         800, 600, SDL_WINDOW_SHOWN);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-    SDL_Event input;
-
-    SDL_RenderSetVSync(renderer, 1);
-
-    bool quit = false;
-    while (!quit) {
-        while (SDL_PollEvent(&input) > 0) {
-            if (input.type == SDL_QUIT ||
-                (input.type == SDL_KEYDOWN && input.key.keysym.sym &&
-                 SDL_KeyCode::SDLK_ESCAPE))
-                quit = true;
-        }
-
-        SDL_SetRenderDrawColor(renderer, 255, 89, 77, 255);
-        SDL_RenderClear(renderer);
-        SDL_RenderPresent(renderer);
-    }
-
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    engine->Run();
 
     return 0;
 }
