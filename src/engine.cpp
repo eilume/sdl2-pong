@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "config.h"
+
 namespace Engine {
 Engine::Engine(const std::string& gameName, CustomProcessInput* processInput,
                CustomUpdate* update, CustomRender* render)
@@ -22,9 +24,9 @@ int Engine::Setup() {
         return 1;
     }
 
-    m_Window =
-        SDL_CreateWindow(m_GameName.c_str(), SDL_WINDOWPOS_CENTERED,
-                         SDL_WINDOWPOS_CENTERED, 640, 360, SDL_WINDOW_SHOWN);
+    m_Window = SDL_CreateWindow(m_GameName.c_str(), SDL_WINDOWPOS_CENTERED,
+                                SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH,
+                                SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (m_Window == NULL) {
         std::cout << "Error: SDL2 Window creation failed! " << SDL_GetError()
                   << std::endl;

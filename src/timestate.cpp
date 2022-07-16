@@ -12,7 +12,7 @@ TimeState::TimeState(uint64_t startCounter)
 void TimeState::NextTimestep(uint64_t currentCounter,
                              uint64_t counterFrequency) {
     float unscaledDelta =
-        (float)((currentCounter - m_Counter) * 1000 / (double)counterFrequency);
+        (float)((currentCounter - m_Counter) / (double)counterFrequency);
 
     m_UnscaledDeltaTime = unscaledDelta;
     m_DeltaTime = unscaledDelta * m_TimeScale;
