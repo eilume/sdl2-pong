@@ -30,6 +30,8 @@ file(GLOB_RECURSE HEADER_FILES ${PROJECT_SOURCE_DIR}
 # Create binary
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
 
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+
 # Apply options based on build type
 if (BUILD_DIST)
 	set(CMAKE_BUILD_TYPE Release)
@@ -59,8 +61,8 @@ else ()
 
     set(BUILD_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin/debug)
 	
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -Og")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og -g")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -Og -g")
 
 	target_compile_definitions(${PROJECT_NAME} PUBLIC BUILD_DEBUG=1)
 endif()
