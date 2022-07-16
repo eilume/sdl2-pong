@@ -16,7 +16,7 @@ void TimeState::NextTimestep(uint64_t currentCounter,
     float unscaledDelta =
         (float)((currentCounter - m_Counter) / (double)counterFrequency);
 
-    std::cout << unscaledDelta << std::endl;
+    // std::cout << unscaledDelta << std::endl;
 
     m_UnscaledDeltaTime = unscaledDelta;
     m_DeltaTime = unscaledDelta * m_TimeScale;
