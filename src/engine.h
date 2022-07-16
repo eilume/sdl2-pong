@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL.h>
+#include <SDL_image.h>
 
 #include <memory>
 #include <string>
@@ -17,7 +18,9 @@ class Engine {
     Engine(const std::string& gameName, CustomProcessInput processInput,
            CustomUpdate update, CustomRender render);
 
+    int Setup();
     void Run();
+    void Cleanup();
 
     inline SDL_Window* GetWindow() { return m_Window; }
     inline SDL_Renderer* GetRenderer() { return m_Renderer; }
@@ -25,8 +28,6 @@ class Engine {
     inline void QueueQuit() { m_QueueQuit = true; }
 
    private:
-    void Setup();
-    void Cleanup();
     void GameLoop();
     void UpdateTime();
 

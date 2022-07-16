@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.2)
-set(CMAKE_CXX_STANDARD 17)
 project("pong")
+set(CMAKE_CXX_STANDARD 17)
+if(APPLE)
+    enable_language(OBJC)
+endif()
 
 # Options for setting build type
 option(BUILD_DEBUG "Debug Build" ON)
@@ -14,12 +17,14 @@ file(GLOB_RECURSE SOURCE_FILES RELATIVE ${PROJECT_SOURCE_DIR}
 
 set(HEADER_FILE_DIRS
 	"${PROJECT_SOURCE_DIR}/src"
-	"${PROJECT_SOURCE_DIR}/vendor/sdl/include"
+	"${PROJECT_SOURCE_DIR}/vendor/SDL/include"
+	"${PROJECT_SOURCE_DIR}/vendor/SDL_image/include"
 )
 
 file(GLOB_RECURSE HEADER_FILES ${PROJECT_SOURCE_DIR}
 	"src/*.h"
-	"vendor/sdl/include/*.h"
+	"vendor/SDL/include/*.h"
+	"vendor/SDL_image/include/*.h"
 )
 
 # Create binary
@@ -64,8 +69,22 @@ make_directory(${BUILD_OUTPUT_PATH})
 
 # Link vendor files
 add_subdirectory(vendor/SDL)
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL2)
+target_link_libraries(${PROJECT_NAME} SDL2)
+
+add_subdirectory(vendor/SDL_image)
+target_link_libraries(${PROJECT_NAME} SDL2_image)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${HEADER_FILE_DIRS})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BUILD_OUTPUT_PATH})
+
+if (BUILD_DIST)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC ASSETS_PATH="./assets/")
+	
+	# Clear folder to remove unused assets
+	file(REMOVE_RECURSE ${BUILD_OUTPUT_PATH}/assets)
+
+    file(COPY ${CMAKE_CURRENT_LIST_DIR}/assets DESTINATION ${BUILD_OUTPUT_PATH})
+else()
+    target_compile_definitions(${PROJECT_NAME} PUBLIC ASSETS_PATH="${PROJECT_SOURCE_DIR}/assets/")
+endif()

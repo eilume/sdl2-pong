@@ -1,5 +1,7 @@
 #include "engine.h"
 
+#include <iostream>
+
 namespace Engine {
 Engine::Engine(const std::string& gameName, CustomProcessInput* processInput,
                CustomUpdate* update, CustomRender* render)
@@ -9,30 +11,49 @@ Engine::Engine(const std::string& gameName, CustomProcessInput* processInput,
       f_Update(update),
       f_Render(render) {}
 
-void Engine::Run() {
-    Setup();
-    GameLoop();
-    Cleanup();
-}
-
-void Engine::Setup() {
-    SDL_Init(SDL_INIT_EVERYTHING);
+int Engine::Setup() {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0) {
+        std::cout << "Error: SDL2 initialization failed! " << SDL_GetError()
+                  << std::endl;
+        return 1;
+    }
+    if (IMG_Init(IMG_INIT_PNG) == 0) {
+        std::cout << "Error: SDL2_image initialization failed!" << std::endl;
+        return 1;
+    }
 
     m_Window =
         SDL_CreateWindow(m_GameName.c_str(), SDL_WINDOWPOS_CENTERED,
-                         SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN);
+                         SDL_WINDOWPOS_CENTERED, 640, 360, SDL_WINDOW_SHOWN);
+    if (m_Window == NULL) {
+        std::cout << "Error: SDL2 Window creation failed! " << SDL_GetError()
+                  << std::endl;
+        return 1;
+    }
+
     m_Renderer = SDL_CreateRenderer(m_Window, -1, 0);
+    if (m_Renderer == NULL) {
+        std::cout << "Error: SDL2 Renderer creation failed! " << SDL_GetError()
+                  << std::endl;
+        return 1;
+    }
 
     SDL_RenderSetVSync(m_Renderer, 1);
 
     m_TimeState = TimeState(SDL_GetPerformanceCounter());
+
+    return 0;
 }
 
 void Engine::Cleanup() {
     SDL_DestroyRenderer(m_Renderer);
     SDL_DestroyWindow(m_Window);
+
+    IMG_Quit();
     SDL_Quit();
 }
+
+void Engine::Run() { GameLoop(); }
 
 void Engine::GameLoop() {
     while (!m_QueueQuit) {
