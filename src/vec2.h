@@ -10,10 +10,9 @@ struct Vec2 {
     Vec2(float x, float y) : x(x), y(y) {}
 
     Vec2 operator+(Vec2 other) { return Vec2(x + other.x, y + other.y); }
+    Vec2 operator+(float other) { return Vec2(x + other, y + other); }
 
-    Vec2 operator*(float multiplier) {
-        return Vec2(x * multiplier, y * multiplier);
-    }
+    Vec2 operator*(float other) { return Vec2(x * other, y * other); }
 
     float Magnitude() { return sqrt(x * x + y * y); }
 };

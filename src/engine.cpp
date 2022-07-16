@@ -42,8 +42,6 @@ int Engine::Setup() {
 
     SDL_RenderSetVSync(m_Renderer, 1);
 
-    m_TimeState = TimeState(SDL_GetPerformanceCounter());
-
     return 0;
 }
 
@@ -55,7 +53,12 @@ void Engine::Cleanup() {
     SDL_Quit();
 }
 
-void Engine::Run() { GameLoop(); }
+void Engine::Run() {
+    // TODO: first few frames have very small delta except one (when window is
+    //       created?), causes large jump in time
+    m_TimeState = TimeState(SDL_GetPerformanceCounter());
+    GameLoop();
+}
 
 void Engine::GameLoop() {
     while (!m_QueueQuit) {
