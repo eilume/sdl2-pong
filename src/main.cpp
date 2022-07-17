@@ -6,7 +6,11 @@
 #include "engine.h"
 #include "entity.h"
 
-const float BALL_BOUNCE_SPEED_MULTIPLIER = 1.1f;
+#ifdef __EMSCRIPTEN__
+#define ASSETS_PATH "./assets/"
+#endif
+
+const float BALL_BOUNCE_SPEED_MULTIPLIER = 1.08f;
 const int BALL_INITIAL_SPEED = 150;
 const int BALL_SPEED_MAX = 1500;
 
@@ -92,7 +96,7 @@ void Update(Engine::TimeState& timestate) {
     BVec2 ballPaddleTwoBounce = Collision::Bounce(ball, paddleTwo->rect);
     BVec2 ballScreenBounce = Collision::Bounce(ball, screenRect, true);
 
-    if (ballScreenBounce.x) {
+    if (ballScreenBounce.x && (ball->pos.x < PADDLE_PADDING || ball->pos.x + ball->rect.w > SCREEN_WIDTH - PADDLE_PADDING)) {
         if (ball->pos.x > SCREEN_WIDTH / 2) {
             playerOneScore++;
         } else {
@@ -104,6 +108,7 @@ void Update(Engine::TimeState& timestate) {
         ball->pos = Vec2(ballCenterPos.x, ballStartHeightDist(gen));
         ball->vel = GenerateBallStartVelocity();
     } else {
+        // TODO: add velocity variation (not always perfect bouncing)
         if ((ballPaddleOneBounce.Or() || ballPaddleTwoBounce.Or()) &&
             ball->vel.Magnitude() < BALL_SPEED_MAX)
             ball->vel = ball->vel * BALL_BOUNCE_SPEED_MULTIPLIER;

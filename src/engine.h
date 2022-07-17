@@ -27,6 +27,9 @@ class Engine {
 
     inline void QueueQuit() { m_QueueQuit = true; }
 
+#ifdef __EMSCRIPTEN__
+    friend void EMSCRIPT_EngineGameLoop(void* enginePtr);
+#endif
    private:
     void GameLoop();
     void UpdateTime();

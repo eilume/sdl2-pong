@@ -1,8 +1,12 @@
 #include "engine.h"
 
-#include <iostream>
-
 #include "config.h"
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
+#include <iostream>
 
 namespace Engine {
 Engine::Engine(const std::string& gameName, CustomProcessInput* processInput,
@@ -53,11 +57,27 @@ void Engine::Cleanup() {
     SDL_Quit();
 }
 
+#ifdef __EMSCRIPTEN__
+void EMSCRIPT_EngineGameLoop(void* enginePtr) {
+    Engine* engine = static_cast<Engine*>(enginePtr);
+
+    engine->UpdateTime();
+
+    engine->f_ProcessInput(engine->m_Event);
+    engine->f_Update(engine->m_TimeState);
+    engine->f_Render();
+}
+#endif
+
 void Engine::Run() {
     // TODO: first few frames have very small delta except one (when window is
     //       created?), causes large jump in time
     m_TimeState = TimeState(SDL_GetPerformanceCounter());
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop_arg(&EMSCRIPT_EngineGameLoop, this, 0, 1);
+#else
     GameLoop();
+#endif
 }
 
 void Engine::GameLoop() {
