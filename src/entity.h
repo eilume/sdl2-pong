@@ -16,13 +16,15 @@ struct Entity {
     Entity(Vec2 pos, Vec2 vel, std::shared_ptr<Texture> tex)
         : pos(pos), vel(vel), tex(tex) {
         UpdateRect();
-        rect.w = tex->GetRect()->w;
-        rect.h = tex->GetRect()->h;
+        Vec2* dimensions = tex->GetDimensions();
+        rect.w = dimensions->x;
+        rect.h = dimensions->y;
     }
     Entity(std::shared_ptr<Texture>) : pos(Vec2()), vel(Vec2()), tex(tex) {
         UpdateRect();
-        rect.w = tex->GetRect()->w;
-        rect.h = tex->GetRect()->h;
+        Vec2* dimensions = tex->GetDimensions();
+        rect.w = dimensions->x;
+        rect.h = dimensions->y;
     }
 
     inline const void UpdateRect() {

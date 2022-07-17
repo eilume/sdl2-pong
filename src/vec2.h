@@ -17,27 +17,51 @@ struct Vec2 {
 
     Vec2 operator+(Vec2 other) const { return Vec2(x + other.x, y + other.y); }
     Vec2 operator+(float other) const { return Vec2(x + other, y + other); }
-    
-    void operator+=(Vec2 other) { x += other.x; y += other.y; }
-    void operator+=(float other) { x += other; y += other; }
-    
+
+    void operator+=(Vec2 other) {
+        x += other.x;
+        y += other.y;
+    }
+    void operator+=(float other) {
+        x += other;
+        y += other;
+    }
+
     Vec2 operator-(Vec2 other) const { return Vec2(x - other.x, y - other.y); }
     Vec2 operator-(float other) const { return Vec2(x - other, y - other); }
-    
-    void operator-=(Vec2 other) { x -= other.x; y -= other.y; }
-    void operator-=(float other) { x -= other; y -= other; }
+
+    void operator-=(Vec2 other) {
+        x -= other.x;
+        y -= other.y;
+    }
+    void operator-=(float other) {
+        x -= other;
+        y -= other;
+    }
 
     Vec2 operator*(Vec2 other) const { return Vec2(x * other.x, y * other.y); }
     Vec2 operator*(float other) const { return Vec2(x * other, y * other); }
 
-    Vec2 operator*=(Vec2 other) { x *= other.x; y *= other.y; }
-    Vec2 operator*=(float other) { x *= other; y *= other; }
-    
+    Vec2 operator*=(Vec2 other) {
+        x *= other.x;
+        y *= other.y;
+    }
+    Vec2 operator*=(float other) {
+        x *= other;
+        y *= other;
+    }
+
     Vec2 operator/(Vec2 other) const { return Vec2(x / other.x, y / other.y); }
     Vec2 operator/(float other) const { return Vec2(x / other, y / other); }
 
-    Vec2 operator/=(Vec2 other) { x /= other.x; y /= other.y; }
-    Vec2 operator/=(float other) { x /= other; y /= other; }
+    Vec2 operator/=(Vec2 other) {
+        x /= other.x;
+        y /= other.y;
+    }
+    Vec2 operator/=(float other) {
+        x /= other;
+        y /= other;
+    }
 
     float Magnitude() { return sqrt(x * x + y * y); }
 };
@@ -51,7 +75,7 @@ struct BVec2 {
 
     inline bool Or() const { return x || y; }
     inline bool And() const { return x && y; }
-    
+
     inline bool True() const { return And(); }
     inline bool False() const { return !And(); }
 

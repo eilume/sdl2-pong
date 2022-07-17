@@ -1,12 +1,13 @@
-#include <iostream>
 #include <random>
+#include <string>
+#include <sstream>
 
 #include "collision.h"
 #include "config.h"
 #include "engine.h"
 #include "entity.h"
+#include "font.h"
 #include "texture.h"
-
 #ifdef __EMSCRIPTEN__
 #define ASSETS_PATH "./assets/"
 #endif
@@ -35,11 +36,19 @@ std::mt19937 gen;
 int playerOneScore;
 int playerTwoScore;
 
+std::shared_ptr<Font> font;
+Entity* score = nullptr;
+
 bool keyDown[SDL_NUM_SCANCODES];
 
-void PrintScore() {
-    std::cout << "Score: " << playerOneScore << " : " << playerTwoScore
-              << std::endl;
+void UpdateScoreText() {
+    if (score != nullptr) delete score;
+
+    std::stringstream ss;
+    ss << "SCORE " << playerOneScore << " : " << playerTwoScore;
+
+    std::shared_ptr<Texture> scoreTex = font->TextToTexture(engine->GetRenderer(), const_cast<char*>(ss.str().c_str()), {255, 255, 255});
+    score = new Entity(Vec2((SCREEN_WIDTH - scoreTex->GetDimensions()->x) / 2, 16), Vec2(), scoreTex);
 }
 
 Vec2 GenerateBallStartVelocity() {
@@ -80,11 +89,9 @@ void ProcessInput(SDL_Event& event) {
 
 void Update(Engine::TimeState& timestate) {
     // Update positions based on velocity
-    paddleOne->pos =
-        paddleOne->pos + (paddleOne->vel * timestate.GetDeltaTime());
-    paddleTwo->pos =
-        paddleTwo->pos + (paddleTwo->vel * timestate.GetDeltaTime());
-    ball->pos = ball->pos + (ball->vel * timestate.GetDeltaTime());
+    paddleOne->pos += paddleOne->vel * timestate.GetDeltaTime();
+    paddleTwo->pos += paddleTwo->vel * timestate.GetDeltaTime();
+    ball->pos += ball->vel * timestate.GetDeltaTime();
 
     // Perform paddle collisions with screen
     Collision::Collide(paddleOne, screenRect, true);
@@ -109,7 +116,7 @@ void Update(Engine::TimeState& timestate) {
             playerTwoScore++;
         }
 
-        PrintScore();
+        UpdateScoreText();
 
         // Reset the ball
         ball->pos = Vec2(ballCenterPos.x, ballStartHeightDist(gen));
@@ -131,6 +138,8 @@ void Render() {
     paddleOne->Render(engine->GetRenderer());
     paddleTwo->Render(engine->GetRenderer());
     ball->Render(engine->GetRenderer());
+
+    score->Render(engine->GetRenderer());
 
     SDL_RenderPresent(engine->GetRenderer());
 }
@@ -157,30 +166,33 @@ int main(int argc, char** args) {
         keyDown[i] = false;
     }
 
+    font = Font::Load(ASSETS_PATH "FFFFORWA.ttf", 16);
+
     // Create ball
     std::shared_ptr<Texture> ballTex =
         Texture::Load(engine->GetRenderer(), ASSETS_PATH "ball.png");
-    ballCenterPos = Vec2((SCREEN_WIDTH - ballTex->GetRect()->w) / 2,
-                         (SCREEN_HEIGHT - ballTex->GetRect()->h) / 2);
-    ballHeightRange = SCREEN_HEIGHT - ballTex->GetRect()->h;
+    ballCenterPos = Vec2((SCREEN_WIDTH - ballTex->GetDimensions()->x) / 2,
+                         (SCREEN_HEIGHT - ballTex->GetDimensions()->y) / 2);
+    ballHeightRange = SCREEN_HEIGHT - ballTex->GetDimensions()->y;
     ball =
         new Entity(Vec2(ballCenterPos), GenerateBallStartVelocity(), ballTex);
 
     // Create paddles
     std::shared_ptr<Texture> paddleTex =
         Texture::Load(engine->GetRenderer(), ASSETS_PATH "paddle.png");
-    paddleOne = new Entity(
-        Vec2(PADDLE_PADDING, (SCREEN_HEIGHT - paddleTex->GetRect()->h) / 2),
-        Vec2(), paddleTex);
-    paddleTwo =
-        new Entity(Vec2(SCREEN_WIDTH - PADDLE_PADDING - paddleTex->GetRect()->w,
-                        (SCREEN_HEIGHT - paddleTex->GetRect()->h) / 2),
+    paddleOne =
+        new Entity(Vec2(PADDLE_PADDING,
+                        (SCREEN_HEIGHT - paddleTex->GetDimensions()->y) / 2),
                    Vec2(), paddleTex);
+    paddleTwo = new Entity(
+        Vec2(SCREEN_WIDTH - PADDLE_PADDING - paddleTex->GetDimensions()->x,
+             (SCREEN_HEIGHT - paddleTex->GetDimensions()->y) / 2),
+        Vec2(), paddleTex);
 
     ballStartHeightDist =
         std::uniform_int_distribution<int>(0, ballHeightRange);
 
-    PrintScore();
+    UpdateScoreText();
 
     engine->Run();
 

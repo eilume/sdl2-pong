@@ -27,6 +27,10 @@ int Engine::Setup() {
         std::cout << "Error: SDL2_image initialization failed!" << std::endl;
         return 1;
     }
+    if (TTF_Init() < 0) {
+        std::cout << "Error: SDL2_ttf initialization failed!" << std::endl;
+        return 1;
+    }
 
     m_Window = SDL_CreateWindow(m_GameName.c_str(), SDL_WINDOWPOS_CENTERED,
                                 SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH,
