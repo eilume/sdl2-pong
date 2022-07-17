@@ -5,16 +5,17 @@
 #include "config.h"
 #include "engine.h"
 #include "entity.h"
+#include "texture.h"
 
 #ifdef __EMSCRIPTEN__
 #define ASSETS_PATH "./assets/"
 #endif
 
-const float BALL_BOUNCE_SPEED_MULTIPLIER = 1.08f;
 const int BALL_INITIAL_SPEED = 150;
 const int BALL_SPEED_MAX = 1500;
+const float BALL_BOUNCE_SPEED_MULTIPLIER = 1.08f;
 
-const int PADDLE_SPEED = 300;
+const int PADDLE_SPEED = 350;
 const int PADDLE_PADDING = 64;
 
 Engine::Engine* engine;
@@ -64,7 +65,9 @@ void ProcessInput(SDL_Event& event) {
         }
     }
 
+#ifndef __EMSCRIPTEN__
     if (keyDown[SDL_SCANCODE_ESCAPE]) engine->QueueQuit();
+#endif
 
     paddleOne->vel.y = 0.0f;
     if (keyDown[SDL_SCANCODE_W]) paddleOne->vel.y -= PADDLE_SPEED;
@@ -83,20 +86,23 @@ void Update(Engine::TimeState& timestate) {
         paddleTwo->pos + (paddleTwo->vel * timestate.GetDeltaTime());
     ball->pos = ball->pos + (ball->vel * timestate.GetDeltaTime());
 
-    // Physics
+    // Perform paddle collisions with screen
     Collision::Collide(paddleOne, screenRect, true);
     Collision::Collide(paddleTwo, screenRect, true);
 
-    paddleOne->rect.x = paddleOne->pos.x;
-    paddleOne->rect.y = paddleOne->pos.y;
-    paddleTwo->rect.x = paddleTwo->pos.x;
-    paddleTwo->rect.y = paddleTwo->pos.y;
+    paddleOne->UpdateRect();
+    paddleTwo->UpdateRect();
 
+    // Perform ball bounces
     BVec2 ballPaddleOneBounce = Collision::Bounce(ball, paddleOne->rect);
     BVec2 ballPaddleTwoBounce = Collision::Bounce(ball, paddleTwo->rect);
     BVec2 ballScreenBounce = Collision::Bounce(ball, screenRect, true);
 
-    if (ballScreenBounce.x && (ball->pos.x < PADDLE_PADDING || ball->pos.x + ball->rect.w > SCREEN_WIDTH - PADDLE_PADDING)) {
+    // If ball bounces on either the left or right side of the screen
+    if (ballScreenBounce.x &&
+        (ball->pos.x < PADDLE_PADDING ||
+         ball->pos.x + ball->rect.w > SCREEN_WIDTH - PADDLE_PADDING)) {
+        // Determine which player should get the score increase
         if (ball->pos.x > SCREEN_WIDTH / 2) {
             playerOneScore++;
         } else {
@@ -105,6 +111,7 @@ void Update(Engine::TimeState& timestate) {
 
         PrintScore();
 
+        // Reset the ball
         ball->pos = Vec2(ballCenterPos.x, ballStartHeightDist(gen));
         ball->vel = GenerateBallStartVelocity();
     } else {
@@ -114,18 +121,17 @@ void Update(Engine::TimeState& timestate) {
             ball->vel = ball->vel * BALL_BOUNCE_SPEED_MULTIPLIER;
     }
 
-    ball->rect.x = ball->pos.x;
-    ball->rect.y = ball->pos.y;
+    ball->UpdateRect();
 }
 
 void Render() {
     SDL_SetRenderDrawColor(engine->GetRenderer(), 130, 47, 82, 255);
     SDL_RenderClear(engine->GetRenderer());
-    SDL_RenderCopy(engine->GetRenderer(), paddleOne->tex, NULL,
-                   &paddleOne->rect);
-    SDL_RenderCopy(engine->GetRenderer(), paddleTwo->tex, NULL,
-                   &paddleTwo->rect);
-    SDL_RenderCopy(engine->GetRenderer(), ball->tex, NULL, &ball->rect);
+
+    paddleOne->Render(engine->GetRenderer());
+    paddleTwo->Render(engine->GetRenderer());
+    ball->Render(engine->GetRenderer());
+
     SDL_RenderPresent(engine->GetRenderer());
 }
 
@@ -152,36 +158,24 @@ int main(int argc, char** args) {
     }
 
     // Create ball
-    SDL_Surface* tmpSurface = IMG_Load(ASSETS_PATH "ball.png");
-    ballCenterPos = Vec2((SCREEN_WIDTH - tmpSurface->w) / 2,
-                         (SCREEN_HEIGHT - tmpSurface->h) / 2);
-    ballHeightRange = SCREEN_HEIGHT - tmpSurface->h;
-    ball = new Entity(
-        Vec2(ballCenterPos), GenerateBallStartVelocity(),
-        SDL_CreateTextureFromSurface(engine->GetRenderer(), tmpSurface),
-        Vec2(tmpSurface->w, tmpSurface->h));
-    if (ball->tex == NULL) {
-        std::cout << "Error creating ball texture";
-        return 1;
-    }
-    SDL_FreeSurface(tmpSurface);
+    std::shared_ptr<Texture> ballTex =
+        Texture::Load(engine->GetRenderer(), ASSETS_PATH "ball.png");
+    ballCenterPos = Vec2((SCREEN_WIDTH - ballTex->GetRect()->w) / 2,
+                         (SCREEN_HEIGHT - ballTex->GetRect()->h) / 2);
+    ballHeightRange = SCREEN_HEIGHT - ballTex->GetRect()->h;
+    ball =
+        new Entity(Vec2(ballCenterPos), GenerateBallStartVelocity(), ballTex);
 
     // Create paddles
-    tmpSurface = IMG_Load(ASSETS_PATH "paddle.png");
-    SDL_Texture* paddleTex =
-        SDL_CreateTextureFromSurface(engine->GetRenderer(), tmpSurface);
-    if (paddleTex == NULL) {
-        std::cout << "Error creating paddle texture";
-        return 1;
-    }
-    paddleOne =
-        new Entity(Vec2(PADDLE_PADDING, (SCREEN_HEIGHT - tmpSurface->h) / 2),
-                   Vec2(), paddleTex, Vec2(tmpSurface->w, tmpSurface->h));
+    std::shared_ptr<Texture> paddleTex =
+        Texture::Load(engine->GetRenderer(), ASSETS_PATH "paddle.png");
+    paddleOne = new Entity(
+        Vec2(PADDLE_PADDING, (SCREEN_HEIGHT - paddleTex->GetRect()->h) / 2),
+        Vec2(), paddleTex);
     paddleTwo =
-        new Entity(Vec2(SCREEN_WIDTH - PADDLE_PADDING - tmpSurface->w,
-                        (SCREEN_HEIGHT - tmpSurface->h) / 2),
-                   Vec2(), paddleTex, Vec2(tmpSurface->w, tmpSurface->h));
-    SDL_FreeSurface(tmpSurface);
+        new Entity(Vec2(SCREEN_WIDTH - PADDLE_PADDING - paddleTex->GetRect()->w,
+                        (SCREEN_HEIGHT - paddleTex->GetRect()->h) / 2),
+                   Vec2(), paddleTex);
 
     ballStartHeightDist =
         std::uniform_int_distribution<int>(0, ballHeightRange);
@@ -190,7 +184,10 @@ int main(int argc, char** args) {
 
     engine->Run();
 
-    SDL_DestroyTexture(ball->tex);
+    delete paddleOne;
+    delete paddleTwo;
+    delete ball;
+
     engine->Cleanup();
 
     return 0;
