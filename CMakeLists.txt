@@ -19,12 +19,14 @@ set(HEADER_FILE_DIRS
 	"${PROJECT_SOURCE_DIR}/src"
 	"${PROJECT_SOURCE_DIR}/vendor/SDL/include"
 	"${PROJECT_SOURCE_DIR}/vendor/SDL_image/include"
+	"${PROJECT_SOURCE_DIR}/vendor/SDL_ttf/include"
 )
 
 file(GLOB_RECURSE HEADER_FILES ${PROJECT_SOURCE_DIR}
 	"src/*.h"
 	"vendor/SDL/include/*.h"
 	"vendor/SDL_image/include/*.h"
+	"vendor/SDL_ttf/include/*.h"
 )
 
 # Create binary
@@ -75,6 +77,9 @@ target_link_libraries(${PROJECT_NAME} SDL2)
 
 add_subdirectory(vendor/SDL_image)
 target_link_libraries(${PROJECT_NAME} SDL2_image)
+
+add_subdirectory(vendor/SDL_ttf)
+target_link_libraries(${PROJECT_NAME} SDL2_ttf)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${HEADER_FILE_DIRS})
 
