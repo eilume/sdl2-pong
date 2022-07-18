@@ -4,9 +4,10 @@
 
 class MathUtils {
    public:
-    static float Lerp(float a, float b, float t)
-    {
-        return a + (b - a) * t;
+    static float Lerp(float a, float b, float t) { return a + (b - a) * t; }
+
+    static float CustomRange(float zeroToOne, float min, float max) {
+        return (zeroToOne * (max - min)) + min;
     }
 
     static constexpr double RadToDeg = 180 / M_PI;

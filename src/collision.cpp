@@ -41,7 +41,7 @@ BVec2 Collision::Bounce(Entity* object, const SDL_Rect& obstacle,
             object->pos.x + object->rect.w > obstacle.x &&
             object->pos.y < obstacle.y + obstacle.h &&
             object->pos.y + object->rect.h > obstacle.y) {
-            // TODO: this is VERY hacked together
+            // TODO: this is _VERY_ hacked together
             if (object->pos.x + object->rect.w > obstacle.x &&
                 object->pos.x + object->rect.w - object->vel.x < obstacle.x) {
                 object->pos.x = obstacle.x - object->rect.w -

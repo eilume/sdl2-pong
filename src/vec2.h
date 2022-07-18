@@ -72,6 +72,17 @@ struct Vec2 {
         return mag > 0 ? Vec2(x / mag, y / mag) : Vec2();
     }
 
+    Vec2 RotateByRads(float radians) {
+        float sin = sinf(radians);
+        float cos = cosf(radians);
+
+        return Vec2((cos * x) - (sin * y), (sin * x) + (cos * y));
+    }
+
+    Vec2 RotateByDeg(float degrees) {
+        return RotateByRads(degrees * MathUtils::DegToRad);
+    }
+
     float GetAngleRads(Vec2 baseVector = Vec2()) {
         Vec2 baseNorm = baseVector.Normalized();
         Vec2 thisNorm = Normalized();
@@ -83,10 +94,7 @@ struct Vec2 {
         return GetAngleRads() * MathUtils::RadToDeg;
     }
 
-    static Vec2 Lerp(Vec2 a, Vec2 b, float t)
-    {
-        return a + (b - a) * t;
-    }
+    static Vec2 Lerp(Vec2 a, Vec2 b, float t) { return a + (b - a) * t; }
 };
 
 struct BVec2 {

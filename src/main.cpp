@@ -22,7 +22,7 @@ const float BALL_BOUNCE_SPEED_MULTIPLIER = 1.08f;
 const int PADDLE_SPEED = 350;
 const int PADDLE_PADDING = 64;
 
-const int PARTICLE_SYSTEM_COUNT = 8;
+const int PARTICLE_SYSTEM_COUNT = 2;
 
 Engine::Engine* engine;
 SDL_Rect screenRect;
@@ -65,7 +65,11 @@ void UpdateScoreText() {
 void StartParticleSystem(Vec2& startPos) {
     for (int i = 0; i < PARTICLE_SYSTEM_COUNT; i++) {
         if (!particleSystems[i].IsActive()) {
-            particleSystems[i].Start(startPos);
+            if (startPos.x < SCREEN_WIDTH / 2.0f) {
+                particleSystems[i].Start(startPos, 180, -90);
+            } else {
+                particleSystems[i].Start(startPos, 180, 90);
+            }
             return;
         }
     }
@@ -143,7 +147,10 @@ void Update(Engine::TimeState& timeState) {
     } else {
         // TODO: add velocity variation (not always perfect bouncing)
         if (ballPaddleOneBounce.Or() || ballPaddleTwoBounce.Or()) {
-            Vec2 startPos = ball->pos + (*ball->tex->GetDimensions() / 2.0f);
+            // Vec2 startPos = ball->pos + (*ball->tex->GetDimensions() / 2.0f);
+            Vec2 startPos = ball->pos.x > SCREEN_WIDTH / 2.0f
+                                ? ball->pos + *ball->tex->GetDimensions()
+                                : ball->pos;
             StartParticleSystem(startPos);
 
             if (ball->vel.Magnitude() < BALL_SPEED_MAX)
