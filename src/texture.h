@@ -25,8 +25,8 @@ class Texture {
         SDL_Surface* tmpSurface = IMG_Load(path);
         SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, tmpSurface);
         if (tex == NULL) {
-            std::cout << "Error: Couldn't load texture from path: '"
-                      << path << "'!" << std::endl;
+            std::cout << "Error: Couldn't load texture from path: '" << path
+                      << "'!" << std::endl;
         }
 
         std::shared_ptr<Texture> output =
@@ -44,7 +44,8 @@ class Texture {
                       << std::endl;
         }
 
-        std::shared_ptr<Texture> output = std::make_shared<Texture>(tex, surface);
+        std::shared_ptr<Texture> output =
+            std::make_shared<Texture>(tex, surface);
         if (freeSurface) SDL_FreeSurface(surface);
         return output;
     }

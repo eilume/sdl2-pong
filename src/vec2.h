@@ -2,11 +2,13 @@
 
 #include <cmath>
 
+#include "mathutils.h"
+
 struct Vec2 {
     float x;
     float y;
 
-    Vec2() : x(0), y(0) {}
+    Vec2() : x(0.0f), y(0.0f) {}
     Vec2(float x, float y) : x(x), y(y) {}
     Vec2(const Vec2& other) : x(other.x), y(other.y) {}
 
@@ -42,11 +44,11 @@ struct Vec2 {
     Vec2 operator*(Vec2 other) const { return Vec2(x * other.x, y * other.y); }
     Vec2 operator*(float other) const { return Vec2(x * other, y * other); }
 
-    Vec2 operator*=(Vec2 other) {
+    void operator*=(Vec2 other) {
         x *= other.x;
         y *= other.y;
     }
-    Vec2 operator*=(float other) {
+    void operator*=(float other) {
         x *= other;
         y *= other;
     }
@@ -54,16 +56,37 @@ struct Vec2 {
     Vec2 operator/(Vec2 other) const { return Vec2(x / other.x, y / other.y); }
     Vec2 operator/(float other) const { return Vec2(x / other, y / other); }
 
-    Vec2 operator/=(Vec2 other) {
+    void operator/=(Vec2 other) {
         x /= other.x;
         y /= other.y;
     }
-    Vec2 operator/=(float other) {
+    void operator/=(float other) {
         x /= other;
         y /= other;
     }
 
     float Magnitude() { return sqrt(x * x + y * y); }
+
+    Vec2 Normalized() {
+        float mag = Magnitude();
+        return mag > 0 ? Vec2(x / mag, y / mag) : Vec2();
+    }
+
+    float GetAngleRads(Vec2 baseVector = Vec2()) {
+        Vec2 baseNorm = baseVector.Normalized();
+        Vec2 thisNorm = Normalized();
+
+        return atan2(thisNorm.y - baseNorm.y, thisNorm.x - baseNorm.x);
+    }
+
+    float GetAngleDeg(Vec2 baseVector = Vec2()) {
+        return GetAngleRads() * MathUtils::RadToDeg;
+    }
+
+    static Vec2 Lerp(Vec2 a, Vec2 b, float t)
+    {
+        return a + (b - a) * t;
+    }
 };
 
 struct BVec2 {

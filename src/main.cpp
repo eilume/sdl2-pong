@@ -1,23 +1,28 @@
+#include <cstring>
 #include <random>
-#include <string>
 #include <sstream>
+#include <string>
 
 #include "collision.h"
 #include "config.h"
 #include "engine.h"
 #include "entity.h"
 #include "font.h"
+#include "particle.h"
 #include "texture.h"
+
 #ifdef __EMSCRIPTEN__
 #define ASSETS_PATH "./assets/"
 #endif
 
 const int BALL_INITIAL_SPEED = 150;
-const int BALL_SPEED_MAX = 1500;
+const int BALL_SPEED_MAX = 1000;
 const float BALL_BOUNCE_SPEED_MULTIPLIER = 1.08f;
 
 const int PADDLE_SPEED = 350;
 const int PADDLE_PADDING = 64;
+
+const int PARTICLE_SYSTEM_COUNT = 8;
 
 Engine::Engine* engine;
 SDL_Rect screenRect;
@@ -39,6 +44,8 @@ int playerTwoScore;
 std::shared_ptr<Font> font;
 Entity* score = nullptr;
 
+std::vector<ParticleSystem> particleSystems;
+
 bool keyDown[SDL_NUM_SCANCODES];
 
 void UpdateScoreText() {
@@ -47,8 +54,21 @@ void UpdateScoreText() {
     std::stringstream ss;
     ss << "SCORE " << playerOneScore << " : " << playerTwoScore;
 
-    std::shared_ptr<Texture> scoreTex = font->TextToTexture(engine->GetRenderer(), const_cast<char*>(ss.str().c_str()), {255, 255, 255});
-    score = new Entity(Vec2((SCREEN_WIDTH - scoreTex->GetDimensions()->x) / 2, 16), Vec2(), scoreTex);
+    std::shared_ptr<Texture> scoreTex = font->TextToTexture(
+        engine->GetRenderer(), const_cast<char*>(ss.str().c_str()),
+        {255, 255, 255});
+    score =
+        new Entity(Vec2((SCREEN_WIDTH - scoreTex->GetDimensions()->x) / 2, 16),
+                   Vec2(), scoreTex);
+}
+
+void StartParticleSystem(Vec2& startPos) {
+    for (int i = 0; i < PARTICLE_SYSTEM_COUNT; i++) {
+        if (!particleSystems[i].IsActive()) {
+            particleSystems[i].Start(startPos);
+            return;
+        }
+    }
 }
 
 Vec2 GenerateBallStartVelocity() {
@@ -87,11 +107,10 @@ void ProcessInput(SDL_Event& event) {
     if (keyDown[SDL_SCANCODE_DOWN]) paddleTwo->vel.y += PADDLE_SPEED;
 }
 
-void Update(Engine::TimeState& timestate) {
-    // Update positions based on velocity
-    paddleOne->pos += paddleOne->vel * timestate.GetDeltaTime();
-    paddleTwo->pos += paddleTwo->vel * timestate.GetDeltaTime();
-    ball->pos += ball->vel * timestate.GetDeltaTime();
+void Update(Engine::TimeState& timeState) {
+    paddleOne->Update(timeState);
+    paddleTwo->Update(timeState);
+    ball->Update(timeState);
 
     // Perform paddle collisions with screen
     Collision::Collide(paddleOne, screenRect, true);
@@ -123,17 +142,29 @@ void Update(Engine::TimeState& timestate) {
         ball->vel = GenerateBallStartVelocity();
     } else {
         // TODO: add velocity variation (not always perfect bouncing)
-        if ((ballPaddleOneBounce.Or() || ballPaddleTwoBounce.Or()) &&
-            ball->vel.Magnitude() < BALL_SPEED_MAX)
-            ball->vel = ball->vel * BALL_BOUNCE_SPEED_MULTIPLIER;
+        if (ballPaddleOneBounce.Or() || ballPaddleTwoBounce.Or()) {
+            Vec2 startPos = ball->pos + (*ball->tex->GetDimensions() / 2.0f);
+            StartParticleSystem(startPos);
+
+            if (ball->vel.Magnitude() < BALL_SPEED_MAX)
+                ball->vel *= BALL_BOUNCE_SPEED_MULTIPLIER;
+        }
     }
 
     ball->UpdateRect();
+
+    for (int i = 0; i < PARTICLE_SYSTEM_COUNT; i++) {
+        particleSystems[i].Update(timeState);
+    }
 }
 
 void Render() {
     SDL_SetRenderDrawColor(engine->GetRenderer(), 130, 47, 82, 255);
     SDL_RenderClear(engine->GetRenderer());
+
+    for (int i = 0; i < PARTICLE_SYSTEM_COUNT; i++) {
+        particleSystems[i].Render(engine->GetRenderer());
+    }
 
     paddleOne->Render(engine->GetRenderer());
     paddleTwo->Render(engine->GetRenderer());
@@ -188,6 +219,14 @@ int main(int argc, char** args) {
         Vec2(SCREEN_WIDTH - PADDLE_PADDING - paddleTex->GetDimensions()->x,
              (SCREEN_HEIGHT - paddleTex->GetDimensions()->y) / 2),
         Vec2(), paddleTex);
+
+    std::shared_ptr<Texture> particleTex =
+        Texture::Load(engine->GetRenderer(), ASSETS_PATH "particle.png");
+
+    particleSystems.reserve(PARTICLE_SYSTEM_COUNT);
+    for (int i = 0; i < PARTICLE_SYSTEM_COUNT; i++) {
+        particleSystems.emplace_back(32, particleTex, &gen);
+    }
 
     ballStartHeightDist =
         std::uniform_int_distribution<int>(0, ballHeightRange);
