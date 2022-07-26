@@ -29,7 +29,7 @@ class ParticleSystem {
                 Vec2(1, 0).RotateByDeg(
                     MathUtils::CustomRange(m_ValueDist(*m_Gen), 0, angleRange) +
                     angleOffset) *
-                MathUtils::CustomRange(m_ValueDist(*m_Gen), 20.0f, 100.0f);
+                MathUtils::CustomRange(m_ValueDist(*m_Gen), 50.0f, 150.0f);
             m_Entities[i].scale = 1.5f;
             m_Entities[i].angle = m_Entities[i].vel.GetAngleDeg();
         }

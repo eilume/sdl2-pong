@@ -18,7 +18,7 @@ Engine::Engine(const std::string& gameName, CustomProcessInput* processInput,
       f_Render(render) {}
 
 int Engine::Setup() {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO) < 0) {
         std::cout << "Error: SDL2 initialization failed! " << SDL_GetError()
                   << std::endl;
         return 1;
@@ -29,6 +29,15 @@ int Engine::Setup() {
     }
     if (TTF_Init() < 0) {
         std::cout << "Error: SDL2_ttf initialization failed!" << std::endl;
+        return 1;
+    }
+    if (Mix_Init(MIX_INIT_OGG) < 0) {
+        std::cout << "Error: SDL2_mixer initialization failed!" << std::endl;
+        return 1;
+    }
+    if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
+    {
+        std::cout << "Error: SDL2 Audio device opening failed!" << std::endl;
         return 1;
     }
 

@@ -9,32 +9,32 @@ setup-all:
 	mkdir -p build/dist
 # Setup cmake
 	cd build/debug && \
-	cmake -DBUILD_DEBUG=1 ../.. && \
+	cmake -DBUILD_DEBUG=1 -S ../.. -B . && \
 	cd ../release && \
-	cmake -DBUILD_RELEASE=1 ../.. && \
+	cmake -DBUILD_RELEASE=1 -S ../.. -B . && \
 	cd ../dist && \
-	cmake -DBUILD_DIST=1 ../..
+	cmake -DBUILD_DIST=1 -S ../.. -B .
 
 .PHONY: setup-debug
 setup-debug:
 	mkdir -p build
 	mkdir -p build/debug
 	cd build/debug && \
-	cmake -DBUILD_DEBUG=1 ../..
+	cmake -DBUILD_DEBUG=1 -S ../.. -B . 
 
 .PHONY: setup-release
 setup-release:
 	mkdir -p build
 	mkdir -p build/release
 	cd build/release && \
-	cmake -DBUILD_RELEASE=1 ../..
+	cmake -DBUILD_RELEASE=1 -S ../.. -B . 
 
 .PHONY: setup-dist
 setup-dist:
 	mkdir -p build
 	mkdir -p build/dist
 	cd build/dist && \
-	cmake -DBUILD_DIST=1 ../..
+	cmake -DBUILD_DIST=1 -S ../.. -B . 
 
 .PHONY: format
 format:
@@ -64,7 +64,7 @@ build-dist:
 build-web:
 	mkdir -p bin
 	mkdir -p bin/web
-	emcc ./src/*.cpp -s WASM=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s SDL2_IMAGE_FORMATS='["png"]' -O3 -o "bin/web/${programFilename}.html" --preload-file ./assets/
+	emcc ./src/*.cpp -s WASM=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s USE_SDL_MIXER=2 -s SDL2_IMAGE_FORMATS='["png"]' -s SDL2_MIXER_FORMATS='["ogg"]' -O3 -o "bin/web/${programFilename}.html" --preload-file ./assets/
 
 .PHONY: run-debug
 run-debug:

@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 
+#include "audio.h"
 #include "collision.h"
 #include "config.h"
 #include "engine.h"
@@ -10,6 +11,7 @@
 #include "font.h"
 #include "particle.h"
 #include "texture.h"
+#include "audio.h"
 
 #ifdef __EMSCRIPTEN__
 #define ASSETS_PATH "./assets/"
@@ -45,6 +47,9 @@ std::shared_ptr<Font> font;
 Entity* score = nullptr;
 
 std::vector<ParticleSystem> particleSystems;
+
+Mix_Music* loopMusic;
+Mix_Chunk* paddleSfx;
 
 bool keyDown[SDL_NUM_SCANCODES];
 
@@ -147,6 +152,7 @@ void Update(Engine::TimeState& timeState) {
     } else {
         // TODO: add velocity variation (not always perfect bouncing)
         if (ballPaddleOneBounce.Or() || ballPaddleTwoBounce.Or()) {
+            Mix_PlayChannel(-1, paddleSfx, 0);
             // Vec2 startPos = ball->pos + (*ball->tex->GetDimensions() / 2.0f);
             Vec2 startPos = ball->pos.x > SCREEN_WIDTH / 2.0f
                                 ? ball->pos + *ball->tex->GetDimensions()
@@ -204,11 +210,11 @@ int main(int argc, char** args) {
         keyDown[i] = false;
     }
 
-    font = Font::Load(ASSETS_PATH "FFFFORWA.ttf", 16);
+    font = Font::Load(ASSETS_PATH "fonts/FFFFORWA.ttf", 16);
 
     // Create ball
     std::shared_ptr<Texture> ballTex =
-        Texture::Load(engine->GetRenderer(), ASSETS_PATH "ball.png");
+        Texture::Load(engine->GetRenderer(), ASSETS_PATH "sprites/ball.png");
     ballCenterPos = Vec2((SCREEN_WIDTH - ballTex->GetDimensions()->x) / 2,
                          (SCREEN_HEIGHT - ballTex->GetDimensions()->y) / 2);
     ballHeightRange = SCREEN_HEIGHT - ballTex->GetDimensions()->y;
@@ -217,7 +223,7 @@ int main(int argc, char** args) {
 
     // Create paddles
     std::shared_ptr<Texture> paddleTex =
-        Texture::Load(engine->GetRenderer(), ASSETS_PATH "paddle.png");
+        Texture::Load(engine->GetRenderer(), ASSETS_PATH "sprites/paddle.png");
     paddleOne =
         new Entity(Vec2(PADDLE_PADDING,
                         (SCREEN_HEIGHT - paddleTex->GetDimensions()->y) / 2),
@@ -228,7 +234,7 @@ int main(int argc, char** args) {
         Vec2(), paddleTex);
 
     std::shared_ptr<Texture> particleTex =
-        Texture::Load(engine->GetRenderer(), ASSETS_PATH "particle.png");
+        Texture::Load(engine->GetRenderer(), ASSETS_PATH "sprites/particle.png");
 
     particleSystems.reserve(PARTICLE_SYSTEM_COUNT);
     for (int i = 0; i < PARTICLE_SYSTEM_COUNT; i++) {
@@ -240,11 +246,31 @@ int main(int argc, char** args) {
 
     UpdateScoreText();
 
+    loopMusic = Mix_LoadMUS(ASSETS_PATH "audio/music_loop.ogg");
+    if (!loopMusic)
+    {
+        return 1;
+    }
+
+    paddleSfx = Mix_LoadWAV(ASSETS_PATH "audio/sfx/impactPunch_medium_000.ogg");
+    if (!paddleSfx)
+    {
+        return 1;
+    }
+
+    Mix_HookMusicFinished([]() {
+        Mix_PlayMusic(loopMusic, -1);
+        Mix_RewindMusic();
+    });
+    Mix_PlayMusic(loopMusic, -1);
+
     engine->Run();
 
     delete paddleOne;
     delete paddleTwo;
     delete ball;
+
+    Mix_FreeMusic(loopMusic);
 
     engine->Cleanup();
 
