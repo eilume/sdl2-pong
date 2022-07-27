@@ -11,7 +11,6 @@
 #include "font.h"
 #include "particle.h"
 #include "texture.h"
-#include "audio.h"
 
 #ifdef __EMSCRIPTEN__
 #define ASSETS_PATH "./assets/"
@@ -48,8 +47,8 @@ Entity* score = nullptr;
 
 std::vector<ParticleSystem> particleSystems;
 
-Mix_Music* loopMusic;
-Mix_Chunk* paddleSfx;
+std::shared_ptr<Music> loopMusic;
+std::shared_ptr<SFX> paddleSfx[10];
 
 bool keyDown[SDL_NUM_SCANCODES];
 
@@ -152,8 +151,7 @@ void Update(Engine::TimeState& timeState) {
     } else {
         // TODO: add velocity variation (not always perfect bouncing)
         if (ballPaddleOneBounce.Or() || ballPaddleTwoBounce.Or()) {
-            Mix_PlayChannel(-1, paddleSfx, 0);
-            // Vec2 startPos = ball->pos + (*ball->tex->GetDimensions() / 2.0f);
+            paddleSfx[rand() % 9]->Play(-1, 0);
             Vec2 startPos = ball->pos.x > SCREEN_WIDTH / 2.0f
                                 ? ball->pos + *ball->tex->GetDimensions()
                                 : ball->pos;
@@ -233,8 +231,8 @@ int main(int argc, char** args) {
              (SCREEN_HEIGHT - paddleTex->GetDimensions()->y) / 2),
         Vec2(), paddleTex);
 
-    std::shared_ptr<Texture> particleTex =
-        Texture::Load(engine->GetRenderer(), ASSETS_PATH "sprites/particle.png");
+    std::shared_ptr<Texture> particleTex = Texture::Load(
+        engine->GetRenderer(), ASSETS_PATH "sprites/particle.png");
 
     particleSystems.reserve(PARTICLE_SYSTEM_COUNT);
     for (int i = 0; i < PARTICLE_SYSTEM_COUNT; i++) {
@@ -246,31 +244,28 @@ int main(int argc, char** args) {
 
     UpdateScoreText();
 
-    loopMusic = Mix_LoadMUS(ASSETS_PATH "audio/music_loop.ogg");
-    if (!loopMusic)
-    {
-        return 1;
+    loopMusic = Music::Load(ASSETS_PATH "audio/music_loop.ogg");
+
+    // Load multiple sfx files
+    for (int i = 0; i < 10; i++) {
+        int fileName = i % 2;
+        int fileIndex = i / 2;
+        std::string sfxPath = ASSETS_PATH "audio/sfx/impactPunch_";
+        sfxPath += (fileName == 0 ? "medium" : "heavy");
+        sfxPath += "_00" + std::to_string(fileIndex) + ".ogg";
+        std::vector<char> pathVector(sfxPath.size() + 1);
+        memcpy(&pathVector.front(), sfxPath.c_str(), sfxPath.size() + 1);
+        char* path = pathVector.data();
+        paddleSfx[i] = SFX::Load(path);
     }
 
-    paddleSfx = Mix_LoadWAV(ASSETS_PATH "audio/sfx/impactPunch_medium_000.ogg");
-    if (!paddleSfx)
-    {
-        return 1;
-    }
-
-    Mix_HookMusicFinished([]() {
-        Mix_PlayMusic(loopMusic, -1);
-        Mix_RewindMusic();
-    });
-    Mix_PlayMusic(loopMusic, -1);
+    loopMusic->Play(-1);
 
     engine->Run();
 
     delete paddleOne;
     delete paddleTwo;
     delete ball;
-
-    Mix_FreeMusic(loopMusic);
 
     engine->Cleanup();
 

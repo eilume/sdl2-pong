@@ -35,8 +35,7 @@ int Engine::Setup() {
         std::cout << "Error: SDL2_mixer initialization failed!" << std::endl;
         return 1;
     }
-    if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
-    {
+    if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 4096) < 0) {
         std::cout << "Error: SDL2 Audio device opening failed!" << std::endl;
         return 1;
     }
