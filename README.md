@@ -6,10 +6,19 @@
     <img src="docs/demo.gif">
 </p>
 
-<!-- TODO: provide web build link -->
-<!-- [Play in a web browser!]() -->
+[Play in a web browser!](https://eilume.itch.io/sdl-pong)
 
-This was an exercise to learn C++ and SDL2, specifically focused on memory management via the usage of `std::shared_ptr` and general code structure/architecture.
+This was a (mostly) weekend exercise to learn C++ and SDL2, specifically focused on memory management via the usage of `std::shared_ptr` and general code structure/architecture.
+
+## Controls
+
+- **W/S** - Player One (Left)
+- **Arrow Up/Down** - Player Two (Right)
+
+## Asset Licenses
+
+- [FFFFORWA Font](https://www.1001fonts.com/fff-forward-font.html) - [See license here](/assets/fonts/FFFFORWA_LICENSE.txt)
+- [Kenney Impact Sounds](https://kenney.nl/assets/impact-sounds) - [See license here](/assets/audio/sfx/License.txt)
 
 ## Libraries
 
@@ -25,7 +34,13 @@ This was an exercise to learn C++ and SDL2, specifically focused on memory manag
 - C++ Compiler (Tested with LLVM's [Clang](https://clang.llvm.org/) v13.1.6 using `-std=c++17`)
 - [CMake](https://cmake.org/) - Cross-platform build environment setup
 
+#### Web Only
+
+- [Emscripten](https://emscripten.org/) - C/C++ to WASM (WebAssembly) Compiler (tested with v3.1.13)
+
 ### Building
+
+*Note*: Only a [Makefile](/Makefile) is provided, so Windows users will have to convert some commands from the makefile to Win32 alternatives!
 
 1. `git clone --recursive https://github.com/eilume/sdl-pong`
 2. `cd sdl-pong`

@@ -20,6 +20,7 @@ set(HEADER_FILE_DIRS
 	"${PROJECT_SOURCE_DIR}/vendor/SDL/include"
 	"${PROJECT_SOURCE_DIR}/vendor/SDL_image/include"
 	"${PROJECT_SOURCE_DIR}/vendor/SDL_ttf/include"
+	"${PROJECT_SOURCE_DIR}/vendor/SDL_mixer/include"
 )
 
 file(GLOB_RECURSE HEADER_FILES ${PROJECT_SOURCE_DIR}
@@ -27,6 +28,7 @@ file(GLOB_RECURSE HEADER_FILES ${PROJECT_SOURCE_DIR}
 	"vendor/SDL/include/*.h"
 	"vendor/SDL_image/include/*.h"
 	"vendor/SDL_ttf/include/*.h"
+	"vendor/SDL_mixer/include/*.h"
 )
 
 # Create binary

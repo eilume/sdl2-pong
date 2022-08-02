@@ -64,7 +64,7 @@ build-dist:
 build-web:
 	mkdir -p bin
 	mkdir -p bin/web
-	emcc ./src/*.cpp -s WASM=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s USE_SDL_MIXER=2 -s SDL2_IMAGE_FORMATS='["png"]' -s SDL2_MIXER_FORMATS='["ogg"]' -O3 -o "bin/web/${programFilename}.html" --preload-file ./assets/
+	emcc ./src/*.cpp -s WASM=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s USE_SDL_MIXER=2 -s SDL2_IMAGE_FORMATS='["png"]' -s SDL2_MIXER_FORMATS='["ogg"]' -O3 -o "bin/web/index.html" --preload-file ./assets/ --shell-file src/shell.html
 
 .PHONY: run-debug
 run-debug:
