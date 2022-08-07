@@ -36,7 +36,7 @@ This was a (mostly) weekend exercise to learn C++ and SDL2, specifically focused
 
 #### Web Only
 
-- [Emscripten](https://emscripten.org/) - C/C++ to WASM (WebAssembly) Compiler (tested with v3.1.13)
+- [Emscripten](https://emscripten.org/) - C/C++ to WASM (WebAssembly) Compiler (Tested with v3.1.13)
 
 ### Building
 
@@ -44,6 +44,6 @@ This was a (mostly) weekend exercise to learn C++ and SDL2, specifically focused
 
 1. `git clone --recursive https://github.com/eilume/sdl-pong`
 2. `cd sdl-pong`
-3. `make setup-[debug|release|dist|all]`
+3. `make setup-[debug|release|dist|all]` **Note:** Not needed for web
 4. `make build-[debug|release|dist|web]`
-5. `make run-[debug|release|dist]`
+5. `make run-[debug|release|dist]` **Note:** No option for web builds, it'll likely require to be hosted from a server
